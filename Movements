@@ -15,29 +15,29 @@ def tacho_speak(word):
         import os
         os.system("espeak -a 200 -s 130 -vfr --stdout "+ word + " | aplay")
 
-def get_sensors():
-        sensors=dict()
-        session=Popen(['./getCurrentPosition'],stdin=PIPE,stdout=PIPE,stderr=PIPE)
-        stdout,stderr=session.communicate()
-        for line in stdout.split('\n'):
-                x=line.split('=')
-                if x[0]=="ID":
-                        id=x[1]
-                        sensors[id]=dict()
-
-                if x[0] not in ['ID',"inputline"] and len(x[0])!=0:
-                        sensors[id][x[0]]=float(x[1])
-        for k in sensors:
-                if k=='100.0':
-                        c1=Point(sensors[k]['X'],sensors[k]['Y'])
-                        d1=sensors[k]['d1']
-                if k=='3.181':
-                        c2=Point(sensors[k]['X'],sensors[k]['Y'])
-                        d2=sensors[k]['d2']
-                if k=='11.0':
-                        c3=Point(sensors[k]['X'],sensors[k]['Y'])
-                        d3=sensors[k]['d3']
-        return (c1,d1,c2,d2,c3,d3)
+#def get_sensors():
+#        sensors=dict()
+#        session=Popen(['./getCurrentPosition'],stdin=PIPE,stdout=PIPE,stderr=PIPE)
+#        stdout,stderr=session.communicate()
+#        for line in stdout.split('\n'):
+#                x=line.split('=')
+#                if x[0]=="ID":
+#                        id=x[1]
+#                        sensors[id]=dict()
+#
+#                if x[0] not in ['ID',"inputline"] and len(x[0])!=0:
+#                        sensors[id][x[0]]=float(x[1])
+#        for k in sensors:
+#                if k=='100.0':
+#                        c1=Point(sensors[k]['X'],sensors[k]['Y'])
+#                        d1=sensors[k]['d1']
+#                if k=='3.181':
+#                        c2=Point(sensors[k]['X'],sensors[k]['Y'])
+#                        d2=sensors[k]['d2']
+#                if k=='11.0':
+#                        c3=Point(sensors[k]['X'],sensors[k]['Y'])
+#                        d3=sensors[k]['d3']
+#        return (c1,d1,c2,d2,c3,d3)
 
 
 
