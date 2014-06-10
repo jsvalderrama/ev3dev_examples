@@ -1,0 +1,100 @@
+#!/usr/bin/python
+from subprocess import *
+COEFF_ROTATION=2.0
+COEFF_AVANCEMENT=25.0
+def tacho_motor(motor, file, value=None):
+        motor = '/sys/class/tacho-motor/out%s:motor:tacho/' % motor.upper()
+        if value is not None:
+                with open(motor + file, 'w') as f:
+                        f.write(str(value))
+        else:
+                with open(motor + file, 'r') as f:
+                        return f.read()
+
+def tacho_speak(word):
+        import os
+        os.system("espeak -a 200 -s 130 -vfr --stdout "+ word + " | aplay")
+
+def get_sensors():
+        sensors=dict()
+        session=Popen(['./getCurrentPosition'],stdin=PIPE,stdout=PIPE,stderr=PIPE)
+        stdout,stderr=session.communicate()
+        for line in stdout.split('\n'):
+                x=line.split('=')
+                if x[0]=="ID":
+                        id=x[1]
+                        sensors[id]=dict()
+
+                if x[0] not in ['ID',"inputline"] and len(x[0])!=0:
+                        sensors[id][x[0]]=float(x[1])
+        for k in sensors:
+                if k=='100.0':
+                        c1=Point(sensors[k]['X'],sensors[k]['Y'])
+                        d1=sensors[k]['d1']
+                if k=='3.181':
+                        c2=Point(sensors[k]['X'],sensors[k]['Y'])
+                        d2=sensors[k]['d2']
+                if k=='11.0':
+                        c3=Point(sensors[k]['X'],sensors[k]['Y'])
+                        d3=sensors[k]['d3']
+        return (c1,d1,c2,d2,c3,d3)
+
+
+
+def init():
+        tacho_motor("B", "run", 0)
+        tacho_motor("C", "run", 0)
+        tacho_motor("B", "speed_setpoint", 30)
+        tacho_motor("C", "speed_setpoint", 30)
+        tacho_motor("B", "run_mode", "position")
+        tacho_motor("C", "run_mode", "position")
+        tacho_motor("B", "brake_mode", "on")
+        tacho_motor("C", "brake_mode", "on")
+        tacho_motor("B", "position", 0)
+        tacho_motor("C", "position", 0)
+        tacho_motor("B", "position_setpoint", 0)
+        tacho_motor("C", "position_setpoint", 0)
+
+
+def tempo():
+        while True:
+                if not int(tacho_motor("B","run")) and not int(tacho_motor("C","run")): $
+
+def move (x):
+        left_pos = int(tacho_motor("B", "position"))
+        right_pos = int(tacho_motor("C", "position"))
+        tacho_motor("B", "position_setpoint", left_pos + (COEFF_AVANCEMENT*x))
+        tacho_motor("C", "position_setpoint", right_pos + (COEFF_AVANCEMENT*x))
+        tacho_motor("B", "run", 1)
+        tacho_motor("C", "run", 1)
+        tempo()
+        tacho_motor("B", "brake_mode", "on")
+        tacho_motor("C", "brake_mode", "on")
+
+def turn (s,d):
+        sens=1 if s=='left' else -1
+        left_pos = int(tacho_motor("B", "position"))
+        right_pos = int(tacho_motor("C", "position"))
+        tacho_motor("B", "position_setpoint", left_pos -(sens*COEFF_ROTATION*d))
+        tacho_motor("C", "position_setpoint", right_pos +(sens*COEFF_ROTATION*d))
+        tacho_motor("B", "run", 1)
+        tacho_motor("C", "run", 1)
+        tempo()
+        tacho_motor("B", "brake_mode", "on")
+        tacho_motor("C", "brake_mode", "on")
+
+init()
+move(50)
+turn('right',90)
+move(20)
+turn('left',90)
+move(10)
+tacho_speak('Rotation\ a\ Droite')
+turn('right',90)
+move(10)
+turn('right',90)
+move(20)
+turn('right',90)
+move(50)
+tacho_speak('EV3 arrived')
+
